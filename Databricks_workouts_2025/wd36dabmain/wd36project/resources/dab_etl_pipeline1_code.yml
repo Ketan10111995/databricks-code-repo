@@ -1,0 +1,15 @@
+resources:
+  pipelines:
+    pipeline_dab_etl_pipeline1:
+      name: dab_etl_pipeline1
+      libraries:
+        - glob:
+            include: ../src/dab_etl_pipeline1/transformations/**
+      schema: default
+      continuous: false
+      development: false
+      photon: true
+      channel: CURRENT
+      catalog: workspace
+      serverless: true
+      root_path: ../src/dab_etl_pipeline1

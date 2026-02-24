@@ -1,0 +1,11 @@
+resources:
+  jobs:
+    job_triggering_dlt_pipeline:
+      name: job_triggering_dlt_pipeline
+      tasks:
+        - task_key: task_pipeline1
+          pipeline_task:
+            pipeline_id: 7c898b98-f597-4672-9040-cbd54bc946f4
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED

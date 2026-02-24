@@ -1,0 +1,23 @@
+resources:
+  jobs:
+    job_call_py_sql:
+      name: job_call_py_sql
+      tasks:
+        - task_key: pythontask
+          spark_python_task:
+            python_file: ../src/kets.py
+          environment_key: Default
+        - task_key: sqlquery
+          depends_on:
+            - task_key: pythontask
+          sql_task:
+            query:
+              query_id: bb49dc1b-cc4f-46a2-9204-b3b5daca1de1
+            warehouse_id: 7b7c206e1b8660b4
+      queue:
+        enabled: true
+      environments:
+        - environment_key: Default
+          spec:
+            environment_version: "4"
+      performance_target: PERFORMANCE_OPTIMIZED

@@ -1,0 +1,17 @@
+resources:
+  jobs:
+    job_to_run_notebook_for_dab:
+      name: job_to_run_notebook_for_dab
+      tasks:
+        - task_key: notebook1
+          notebook_task:
+            notebook_path: ../src/wd36_load_bronze.ipynb
+            source: WORKSPACE
+      queue:
+        enabled: true
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: schema
+          default: ${var.schema}
+      performance_target: PERFORMANCE_OPTIMIZED
