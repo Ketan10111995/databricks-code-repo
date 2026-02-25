@@ -1,0 +1,352 @@
+{
+  "datasets": [
+    {
+      "name": "94428759",
+      "displayName": "drugstbl_medal_bronze3",
+      "queryLines": [
+        "SELECT * FROM catalog1_we47.default.drugstbl_medal_bronze3"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "9ad52046",
+      "displayName": "visuals",
+      "layout": [
+        {
+          "widget": {
+            "name": "1661e35d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "94428759",
+                  "fields": [
+                    {
+                      "name": "drugname",
+                      "expression": "`drugname`"
+                    },
+                    {
+                      "name": "avg(rating)",
+                      "expression": "AVG(`rating`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Average Rating by Drug Name",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "drugname",
+                  "displayName": "Drug Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(rating)",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    },
+                    "abbreviation": "none"
+                  },
+                  "displayName": "Average Rating",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "drugname",
+                  "legend": {
+                    "position": "right"
+                  },
+                  "displayName": "Drug Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#232121"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 1,
+            "width": 7,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "c006c7f9",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block\"><span style=\"font-size:24px;color:#077A9D\">**Drugs data 2001-2026**</span></span>"
+              ]
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "light": "#6DCDEE"
+              },
+              "widgetBorderColor": {
+                "light": "#1E1C1C"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "0d68e758",
+            "queries": [
+              {
+                "name": "dashboards/01f111f65ea9179ab31e6a47b456b939/datasets/01f111f7c88b16089d8ecb5827788618_rating",
+                "query": {
+                  "datasetName": "94428759",
+                  "fields": [
+                    {
+                      "name": "min(rating)",
+                      "expression": "MIN(`rating`)"
+                    },
+                    {
+                      "name": "max(rating)",
+                      "expression": "MAX(`rating`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "range-slider",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "rating",
+                    "queryName": "dashboards/01f111f65ea9179ab31e6a47b456b939/datasets/01f111f7c88b16089d8ecb5827788618_rating"
+                  }
+                ]
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#282626"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 5,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "9ac0d574",
+            "queries": [
+              {
+                "name": "dashboards/01f111f65ea9179ab31e6a47b456b939/datasets/01f111f7c88b16089d8ecb5827788618_date",
+                "query": {
+                  "datasetName": "94428759",
+                  "fields": [
+                    {
+                      "name": "date",
+                      "expression": "`date`"
+                    },
+                    {
+                      "name": "date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true
+              },
+              "selection": {
+                "defaultSelection": {
+                  "values": {
+                    "dataType": "DATE",
+                    "values": [
+                      {
+                        "value": "now-1y/y"
+                      }
+                    ]
+                  }
+                }
+              },
+              "widgetType": "filter-date-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "date",
+                    "queryName": "dashboards/01f111f65ea9179ab31e6a47b456b939/datasets/01f111f7c88b16089d8ecb5827788618_date"
+                  }
+                ]
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#141313"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 5,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "82ca2cf8",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "94428759",
+                  "fields": [
+                    {
+                      "name": "drugname",
+                      "expression": "`drugname`"
+                    },
+                    {
+                      "name": "sum(usefulcount)",
+                      "expression": "SUM(`usefulcount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Useful Count by Drug Name",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "drugname",
+                  "displayName": "Drug Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(usefulcount)",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "none"
+                  },
+                  "displayName": "Total Useful Count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "drugname",
+                  "legend": {
+                    "position": "right"
+                  },
+                  "displayName": "Drug Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "light": "#252222"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 5,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#E3C066",
+        "dark": "#1F1E1D"
+      },
+      "widgetBackgroundColor": {
+        "light": "#EBE9E2",
+        "dark": "#1B1817"
+      },
+      "widgetBorderColor": {
+        "light": "#D5CEC3",
+        "dark": "#2F2E2B"
+      },
+      "fontColor": {
+        "light": "#3D3C39",
+        "dark": "#FAFBF9"
+      },
+      "selectionColor": {
+        "light": "#5F7E52",
+        "dark": "#7A8F3E"
+      },
+      "visualizationColors": [
+        "#1A4F27",
+        "#B35900",
+        "#3A9BDC",
+        "#7A8F3E",
+        "#E8B200",
+        "#767676",
+        "#C23B22"
+      ],
+      "widgetHeaderAlignment": "LEFT"
+    },
+    "applyModeEnabled": false
+  }
+}
