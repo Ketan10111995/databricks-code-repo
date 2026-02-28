@@ -28,4 +28,4 @@ spark.sql(f"select * from {text_box_value}").display()#Declarative lang
 
 # COMMAND ----------
 
-dbutils.notebook.exit("notebook completed successfully")
+dbutils.notebook.exit("notebook run and completed successfully and ready for exit")
