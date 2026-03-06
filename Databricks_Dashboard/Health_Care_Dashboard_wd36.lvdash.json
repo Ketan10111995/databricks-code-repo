@@ -1,0 +1,1862 @@
+{
+  "datasets": [
+    {
+      "name": "2e2e12eb",
+      "displayName": "drug_data_visual1_top5_avg_rating",
+      "queryLines": [
+        "SELECT * FROM drug_info"
+      ],
+      "columns": [
+        {
+          "displayName": "ratepc",
+          "description": "rating percentage",
+          "expression": "rating/100"
+        }
+      ],
+      "catalog": "catalog1_we47",
+      "schema": "default"
+    },
+    {
+      "name": "2cd1f332",
+      "displayName": "patients_data",
+      "queryLines": [
+        "SELECT *,decimal(TotalCharges) as TotalCharges_decimal FROM patients where trim(TotalCharges)<>''"
+      ],
+      "columns": [
+        {
+          "displayName": "ratepc",
+          "description": "rating percentage",
+          "expression": "rating/100"
+        }
+      ],
+      "catalog": "catalog1_we47",
+      "schema": "default"
+    },
+    {
+      "name": "57a10bdc",
+      "displayName": "drugs_patients_data",
+      "queryLines": [
+        "select * from drug_patients_wide_fact_mat_vw;"
+      ],
+      "columns": [
+        {
+          "displayName": "ratepc",
+          "description": "rating percentage",
+          "expression": "rating/100"
+        }
+      ],
+      "catalog": "catalog1_we47",
+      "schema": "default"
+    },
+    {
+      "name": "462534ef",
+      "displayName": "drugs_patients_aggr_fact",
+      "queryLines": [
+        "--Aggregated/summary fact\r\n",
+        "SELECT rating,Multipleillness,InPatient,count(1) as cnt,sum(double(p.TotalCharges)) sum_tot_charges\r\n",
+        "FROM drug_info d inner join patients p \r\n",
+        "on d.uniqueID=p.drugid\r\n",
+        "where trim(TotalCharges)<>''\r\n",
+        "group by rating,Multipleillness,InPatient"
+      ],
+      "columns": [
+        {
+          "displayName": "ratepc",
+          "description": "rating percentage",
+          "expression": "rating/100"
+        }
+      ],
+      "catalog": "catalog1_we47",
+      "schema": "default"
+    },
+    {
+      "name": "e2e4bb59",
+      "displayName": "gold_staff_geo_fact",
+      "queryLines": [
+        "SELECT distinct staff_geo.shipment_id,staff_geo.age,staff_geo.origin_hub_city,staff_geo.load_dt,staff_geo.staff_full_name,staff_geo.hub_location,\r\n",
+        "cast(staff_geo.latitude as double) as latitude ,cast(staff_geo.longitude as double) as longitude,geo.country \r\n",
+        "FROM workspace.default.gold_staff_geo_enriched_dlt2 staff_geo \r\n",
+        "inner join catalog1_we47.default.master_city_list geo\r\n",
+        "on staff_geo.hub_location = geo.city_name;"
+      ]
+    },
+    {
+      "name": "a1e7dac0",
+      "displayName": "drug_info",
+      "queryLines": [
+        "SELECT * FROM catalog1_we47.default.drug_info"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "9e220155",
+      "displayName": "drugs view",
+      "layout": [
+        {
+          "widget": {
+            "name": "f5d87758",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block;\"><span style=\"font-size: 18px;\">**Drugs Usage Metrics**</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "total-drugs-vs-distinct-rating",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "countdistinct(rating)",
+                      "expression": "COUNT(DISTINCT `rating`)"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "parameterValues": [
+                    {
+                      "keyword": "parameter1",
+                      "selection": {
+                        "values": {
+                          "dataType": "STRING",
+                          "values": [
+                            {
+                              "value": "Cipla"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": "Total Drugs vs Distinct Ratings",
+                "description": "KPI"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(*)"
+                },
+                "target": {
+                  "fieldName": "countdistinct(rating)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 1,
+            "width": 8,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "rating-comparison-drugs-count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "sum(rating)",
+                      "expression": "SUM(`rating`)"
+                    },
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    },
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    },
+                    {
+                      "name": "count(uniqueID)",
+                      "expression": "COUNT(`uniqueID`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "IN_RANGE(`date`, DATE'2012-01-01T00:00:00.000', DATE'2018-02-28T00:00:00.000')"
+                    },
+                    {
+                      "expression": "IN_RANGE(`rating`, 3, 10)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "Rating Comparison of Drugs Count"
+              },
+              "annotations": [
+                {
+                  "type": "horizontal-line",
+                  "encodings": {
+                    "y": {
+                      "dataValue": "650",
+                      "dataType": "INTEGER"
+                    },
+                    "label": {
+                      "value": "Median Rating count"
+                    },
+                    "color": {
+                      "value": {
+                        "themeColorType": "visualizationColors",
+                        "position": 4
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "vertical-line",
+                  "encodings": {
+                    "x": {
+                      "dataValue": "6",
+                      "dataType": "INTEGER"
+                    },
+                    "label": {
+                      "value": "Median Rating Value"
+                    }
+                  }
+                }
+              ],
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "rating",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "count(uniqueID)",
+                  "displayName": "count of unique id",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(rating)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                },
+                "extra": [
+                  {
+                    "fieldName": "sum(usefulCount)"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 7,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "b2d4eb29",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "usefulCount",
+                      "expression": "`usefulCount`"
+                    },
+                    {
+                      "name": "count(condition)",
+                      "expression": "COUNT(`condition`)"
+                    },
+                    {
+                      "name": "avg(rating)",
+                      "expression": "AVG(`rating`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "IN_RANGE(`usefulCount`, 70, 90)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "color": {
+                  "fieldName": "usefulCount",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": false
+                },
+                "extra": [
+                  {
+                    "fieldName": "count(condition)"
+                  },
+                  {
+                    "fieldName": "avg(rating)"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 7,
+            "y": 3,
+            "width": 5,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "7506789e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "monthly(date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `date`)"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "82a7fd34",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "max(date)",
+                      "expression": "MAX(`date`)"
+                    },
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    },
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    },
+                    {
+                      "name": "count(uniqueID)",
+                      "expression": "COUNT(`uniqueID`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "annotations": [
+                {
+                  "type": "horizontal-line",
+                  "encodings": {
+                    "y": {
+                      "dataValue": "25000",
+                      "dataType": "INTEGER"
+                    },
+                    "label": {
+                      "value": "Expected Sum of useful count"
+                    },
+                    "color": {
+                      "value": {
+                        "themeColorType": "visualizationColors",
+                        "position": 3
+                      }
+                    }
+                  }
+                }
+              ],
+              "widgetType": "combo",
+              "encodings": {
+                "x": {
+                  "fieldName": "rating",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "sum(usefulCount)"
+                      }
+                    ]
+                  },
+                  "secondary": {
+                    "fields": [
+                      {
+                        "fieldName": "count(uniqueID)"
+                      }
+                    ]
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "legend": {
+                    "position": "top",
+                    "title": "Comparison of useful count & Drug Count"
+                  }
+                },
+                "label": {
+                  "show": true
+                },
+                "extra": [
+                  {
+                    "fieldName": "max(date)"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 24,
+            "width": 12,
+            "height": 11
+          }
+        },
+        {
+          "widget": {
+            "name": "9cfcd868",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    },
+                    {
+                      "name": "monthly(date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `date`)"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(usefulCount)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "greenblue"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "7170c6f1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "drugName",
+                      "expression": "`drugName`"
+                    },
+                    {
+                      "name": "condition",
+                      "expression": "`condition`"
+                    },
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    },
+                    {
+                      "name": "count(uniqueID)",
+                      "expression": "COUNT(`uniqueID`)"
+                    },
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "IN_RANGE(`rating`, 7, 10)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Drug Details: ID, Useful Count, Rating",
+                "showTitle": true
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "drugName",
+                    "displayName": "Drug Name"
+                  },
+                  {
+                    "fieldName": "condition",
+                    "displayName": "Condition"
+                  },
+                  {
+                    "fieldName": "sum(usefulCount)",
+                    "displayName": "Useful Count"
+                  },
+                  {
+                    "fieldName": "count(uniqueID)",
+                    "displayName": "count Drug ID"
+                  },
+                  {
+                    "fieldName": "rating",
+                    "displayName": "Rating"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 35,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "4df72839",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "drugName",
+                      "expression": "`drugName`"
+                    },
+                    {
+                      "name": "condition",
+                      "expression": "`condition`"
+                    },
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    },
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`condition` IN ('Allergic Reactions', 'Allergic Rhinitis', 'Allergies', 'Conjunctivitis, Allergic')"
+                    }
+                  ],
+                  "cubeGroupingSets": {
+                    "sets": [
+                      {
+                        "fieldNames": [
+                          "drugName"
+                        ]
+                      },
+                      {
+                        "fieldNames": [
+                          "condition",
+                          "rating"
+                        ]
+                      }
+                    ]
+                  },
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`drugName`"
+                    },
+                    {
+                      "direction": "ASC",
+                      "expression": "`condition`"
+                    },
+                    {
+                      "direction": "ASC",
+                      "expression": "`rating`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pivot",
+              "encodings": {
+                "rows": [
+                  {
+                    "fieldName": "drugName"
+                  }
+                ],
+                "columns": [
+                  {
+                    "fieldName": "condition"
+                  },
+                  {
+                    "fieldName": "rating"
+                  }
+                ],
+                "cell": {
+                  "type": "multi-cell",
+                  "fields": [
+                    {
+                      "fieldName": "sum(usefulCount)",
+                      "cellType": "text"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 41,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "e8ccffae",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "condition",
+                      "expression": "`condition`"
+                    },
+                    {
+                      "name": "min(usefulCount)",
+                      "expression": "MIN(`usefulCount`)"
+                    },
+                    {
+                      "name": "q1(usefulCount)",
+                      "expression": "PERCENTILE(`usefulCount`, 0.25)"
+                    },
+                    {
+                      "name": "median(usefulCount)",
+                      "expression": "MEDIAN(`usefulCount`)"
+                    },
+                    {
+                      "name": "q3(usefulCount)",
+                      "expression": "PERCENTILE(`usefulCount`, 0.75)"
+                    },
+                    {
+                      "name": "max(usefulCount)",
+                      "expression": "MAX(`usefulCount`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`condition` IN ('Agitated State', 'Allergies', 'Basal Cell Carcinoma', 'ADHD')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "box",
+              "encodings": {
+                "x": {
+                  "fieldName": "condition",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "whiskerStart": {
+                    "fieldName": "min(usefulCount)"
+                  },
+                  "boxStart": {
+                    "fieldName": "q1(usefulCount)"
+                  },
+                  "boxMid": {
+                    "fieldName": "median(usefulCount)"
+                  },
+                  "boxEnd": {
+                    "fieldName": "q3(usefulCount)"
+                  },
+                  "whiskerEnd": {
+                    "fieldName": "max(usefulCount)"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 47,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "d36e864b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    },
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "waterfall",
+              "encodings": {
+                "x": {
+                  "fieldName": "rating",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(usefulCount)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 61,
+            "width": 12,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "05ad87a8",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    },
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "funnel",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(usefulCount)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "rating",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 53,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "0ccb3954",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    },
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    },
+                    {
+                      "name": "usefulCount",
+                      "expression": "`usefulCount`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "IN_RANGE(`usefulCount`, 50, 60)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "heatmap",
+              "encodings": {
+                "x": {
+                  "fieldName": "rating",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "usefulCount",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(usefulCount)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "reds"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 53,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "7bbc85fa",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "usefulCount",
+                      "expression": "`usefulCount`"
+                    },
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    },
+                    {
+                      "name": "condition",
+                      "expression": "`condition`"
+                    },
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "IN_RANGE(`usefulCount`, 10, 15)"
+                    },
+                    {
+                      "expression": "`condition` IN ('ADHD', 'Allergies')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "sankey",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(usefulCount)"
+                },
+                "stages": [
+                  {
+                    "fieldName": "usefulCount"
+                  },
+                  {
+                    "fieldName": "rating"
+                  },
+                  {
+                    "fieldName": "condition"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 66,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "3464cdf7",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2e2e12eb",
+                  "fields": [
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    },
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top-Rated Drugs by Useful Count",
+                "showTitle": true
+              },
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "rating",
+                  "displayName": "Drug Name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(usefulCount)",
+                  "displayName": "Useful Count",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "rating",
+                  "displayName": "Rating",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "orangered"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 72,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "009c86d9",
+      "displayName": "patients_view",
+      "layout": [
+        {
+          "widget": {
+            "name": "total-patients",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2cd1f332",
+                  "fields": [
+                    {
+                      "name": "countdistinct(patientid)",
+                      "expression": "COUNT(DISTINCT `patientid`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Patients"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(patientid)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "9f555102",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2cd1f332",
+                  "fields": [
+                    {
+                      "name": "sum(DrugCharges)",
+                      "expression": "SUM(`DrugCharges`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Charges Paid"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(DrugCharges)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "7dbc212e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2cd1f332",
+                  "fields": [
+                    {
+                      "name": "PaymentMethod",
+                      "expression": "`PaymentMethod`"
+                    },
+                    {
+                      "name": "sum(TotalCharges_decimal)",
+                      "expression": "SUM(`TotalCharges_decimal`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "PaymentMethod",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(TotalCharges_decimal)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "76b7443b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2cd1f332",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    },
+                    {
+                      "name": "PaymentMethod",
+                      "expression": "`PaymentMethod`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "PaymentMethod",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "de7ef8fe",
+      "displayName": "combined view",
+      "layout": [
+        {
+          "widget": {
+            "name": "02ed4c5d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "57a10bdc",
+                  "fields": [
+                    {
+                      "name": "SeniorCitizen",
+                      "expression": "`SeniorCitizen`"
+                    },
+                    {
+                      "name": "rating",
+                      "expression": "`rating`"
+                    },
+                    {
+                      "name": "InPatient",
+                      "expression": "`InPatient`"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "sankey",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(*)"
+                },
+                "stages": [
+                  {
+                    "fieldName": "SeniorCitizen"
+                  },
+                  {
+                    "fieldName": "rating"
+                  },
+                  {
+                    "fieldName": "InPatient"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "stacked-bar-chart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "57a10bdc",
+                  "fields": [
+                    {
+                      "name": "SeniorCitizen",
+                      "expression": "`SeniorCitizen`"
+                    },
+                    {
+                      "name": "sum(DrugCharges)",
+                      "expression": "SUM(`DrugCharges`)"
+                    },
+                    {
+                      "name": "sum(TotalCharges_decimal)",
+                      "expression": "SUM(`TotalCharges_decimal`)"
+                    },
+                    {
+                      "name": "sum(usefulcount)",
+                      "expression": "SUM(`usefulcount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Stacked Bar Chart"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 1
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "SeniorCitizen",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "sum(DrugCharges)"
+                    },
+                    {
+                      "fieldName": "sum(TotalCharges_decimal)"
+                    },
+                    {
+                      "fieldName": "sum(usefulcount)"
+                    }
+                  ]
+                },
+                "color": {
+                  "legend": {
+                    "position": "right"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "24a747fa",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "57a10bdc",
+                  "fields": [
+                    {
+                      "name": "monthly(date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `date`)"
+                    },
+                    {
+                      "name": "sum(DrugCharges)",
+                      "expression": "SUM(`DrugCharges`)"
+                    },
+                    {
+                      "name": "sum(usefulCount)",
+                      "expression": "SUM(`usefulCount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Stacked Bar Chart"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 1
+                  },
+                  {
+                    "themeColorType": "selectionColor"
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  }
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(date)",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "sum(DrugCharges)"
+                    },
+                    {
+                      "fieldName": "sum(usefulCount)"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "this-visual-created-from-aggregated-table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "462534ef",
+                  "fields": [
+                    {
+                      "name": "sum(sum_tot_charges)",
+                      "expression": "SUM(`sum_tot_charges`)"
+                    },
+                    {
+                      "name": "InPatient",
+                      "expression": "`InPatient`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "This Visual is created from the Aggregated Table"
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(sum_tot_charges)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "InPatient",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "7b95d1ea",
+      "displayName": "geo_map_view",
+      "layout": [
+        {
+          "widget": {
+            "name": "9abb8af3",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block\"><span style=\"color:#FFAB00;font-size:36px;line-height:1.5\">Geo Data (Location/GeoPoints) Visuals</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "cf6fdf77",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e2e4bb59",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "region": {
+                  "regionType": "mapbox-v4-admin",
+                  "admin0": {
+                    "fieldName": "country",
+                    "type": "field",
+                    "geographicRole": "admin0-name"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 10
+          }
+        },
+        {
+          "widget": {
+            "name": "geo-point-map-plot-number-driver-events-globe",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e2e4bb59",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    },
+                    {
+                      "name": "latitude",
+                      "expression": "`latitude`"
+                    },
+                    {
+                      "name": "longitude",
+                      "expression": "`longitude`"
+                    },
+                    {
+                      "name": "hub_location",
+                      "expression": "`hub_location`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Geo Point map to plot the number of driver events happing across the globe"
+              },
+              "mark": {
+                "opacity": 1
+              },
+              "widgetType": "symbol-map",
+              "encodings": {
+                "coordinates": {
+                  "latitude": {
+                    "fieldName": "latitude"
+                  },
+                  "longitude": {
+                    "fieldName": "longitude"
+                  }
+                },
+                "color": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "reds"
+                    }
+                  }
+                },
+                "size": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "hub_location"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 11
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "e4072c2b",
+      "displayName": "Global Filters",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#000000"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#000000"
+      },
+      "widgetBorderColor": {
+        "light": "#000000",
+        "dark": "#00FF00"
+      },
+      "fontColor": {
+        "light": "#000000",
+        "dark": "#00FF00"
+      },
+      "selectionColor": {
+        "light": "#FF00FF",
+        "dark": "#FFFFFF"
+      },
+      "visualizationColors": [
+        "#EE7733",
+        "#0077BB",
+        "#33BBEE",
+        "#EE3377",
+        "#CC3311",
+        "#009988",
+        "#BBBBBB"
+      ],
+      "widgetHeaderAlignment": "LEFT"
+    },
+    "applyModeEnabled": false
+  }
+}
