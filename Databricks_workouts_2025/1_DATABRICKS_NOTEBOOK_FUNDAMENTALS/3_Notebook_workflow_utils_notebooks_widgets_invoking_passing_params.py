@@ -122,7 +122,7 @@ for i in all_batches_lst:
 fullname="mohamed kader irfan"
 fname=fullname.split(" ")[0]
 lname=fullname.split(" ")[-1]
-print(fname, 'and', lname)
+print(fname, lname)
 
 # COMMAND ----------
 

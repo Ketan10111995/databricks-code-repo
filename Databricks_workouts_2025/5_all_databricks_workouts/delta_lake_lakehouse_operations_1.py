@@ -217,6 +217,11 @@ df.where('uniqueid=206473').show()
 # COMMAND ----------
 
 # MAGIC %sql
+# MAGIC select count(*) from drugstbl where rating>8
+
+# COMMAND ----------
+
+# MAGIC %sql
 # MAGIC select count(*) from drugstbl_merge;
 
 # COMMAND ----------
@@ -349,7 +354,7 @@ print(spark.read.table("drugstbl_merge").count())
 
 # MAGIC %sql
 # MAGIC --select * from (select * from deltadb.drugs version as of 2) where uniqueid=163740;
-# MAGIC SELECT count(*) FROM drugstbl_merge VERSION AS OF 2;--Behind the scene, databricks sql engine with the help of deltaengine (it will read the log and the respective data and produce the output)
+# MAGIC SELECT count(*) FROM drugstbl_merge VERSION AS OF 15;--Behind the scene, databricks sql engine with the help of deltaengine (it will read the log and the respective data and produce the output)
 
 # COMMAND ----------
 
@@ -522,7 +527,7 @@ spark.sql("VACUUM drugstbl_merge RETAIN 168 HOURS")
 # MAGIC --Apply constraint for maintaining consistancy
 # MAGIC --We can apply in databricks deltatable, 2 types of constraints (check and not null), 
 # MAGIC -- in other DBs we can use primary key, foreign key and unique constraints also..
-# MAGIC ALTER TABLE acid_demo_txn ADD CONSTRAINT positive_amount CHECK (amount > 0);
+# MAGIC ALTER TABLE acid_demo_txn ADD CONSTRAINT positive_amt CHECK (amount > 0);
 # MAGIC INSERT INTO acid_demo_txn VALUES (4, 100);--Atomicity and consistancy
 # MAGIC INSERT INTO acid_demo_txn VALUES (5, 100);--Atomicity and consistancy
 
@@ -552,7 +557,7 @@ spark.sql("VACUUM drugstbl_merge RETAIN 168 HOURS")
 
 # MAGIC %sql
 # MAGIC --something like savepoint+rollback (but not really a rollback (TCL is not available in Databricks in the name of commit, rollback, savepoint))
-# MAGIC restore table acid_demo_txn to version as of 10;
+# MAGIC restore table acid_demo_txn version as of 12;
 
 # COMMAND ----------
 
@@ -564,7 +569,7 @@ spark.sql("VACUUM drugstbl_merge RETAIN 168 HOURS")
 
 # MAGIC %sql
 # MAGIC --Durability (Despite of terminate and starting back the serverless, data still survives durably)
-# MAGIC INSERT INTO acid_demo_txn VALUES (5, 500);
+# MAGIC INSERT INTO acid_demo_txn VALUES (6, 500);
 
 # COMMAND ----------
 

@@ -1,0 +1,67 @@
+{
+  "custom_summary": "{{email_subject}}",
+  "evaluation": {
+    "source": {
+      "name": "ai_generated_email",
+      "display": "ai_generated_email",
+      "aggregation": "AGGREGATION_UNSPECIFIED"
+    },
+    "comparison_operator": "EQUAL",
+    "threshold": {
+      "column": {
+        "name": "ai_generated_email",
+        "display": "ai_generated_email",
+        "aggregation": "AGGREGATION_UNSPECIFIED"
+      }
+    },
+    "empty_result_state": "OK",
+    "notification": {
+      "retrigger_seconds": 1,
+      "notify_on_ok": true
+    }
+  },
+  "schedule": {
+    "quartz_cron_schedule": "35 54 22 * * ?",
+    "timezone_id": "Asia/Calcutta"
+  },
+  "query_lines": [
+    "SELECT ",
+    "  customer_name,",
+    "  ",
+    "  -- 1. Extract Subject",
+    "  TRIM(REGEXP_EXTRACT(ai_generated_email, '(?i)Subject:\\\\s*([^\\\\n]+)', 1)) AS email_subject,",
+    "  ",
+    "  -- 2. Extract Salutation (Looks for Dear, Hi, or Hello until the end of the line)",
+    "  TRIM(REGEXP_EXTRACT(ai_generated_email, '(?i)(Dear\\\\s+[^\\\\n]+|Hi\\\\s+[^\\\\n]+|Hello\\\\s+[^\\\\n]+)', 1)) AS salutation,",
+    "  ",
+    "  -- 3. Extract Sign-off (Grabs \"Best regards\", \"Sincerely\", or \"Regards\" and everything after it)",
+    "  -- We replace the standard newline \\n with HTML <br> so it formats correctly in the email",
+    "  REPLACE(",
+    "    TRIM(REGEXP_EXTRACT(ai_generated_email, '(?i)(Best regards[\\\\s\\\\S]*|Sincerely[\\\\s\\\\S]*|Regards[\\\\s\\\\S]*)', 1)), ",
+    "    '\\n', '<br>'",
+    "  ) AS sign_off,",
+    "  ",
+    "  -- 4. Extract Core Content (Removes the Subject, Salutation, and Sign-off, leaving only the main body)",
+    "  -- We also replace newlines with <br> for clean HTML formatting",
+    "  REPLACE(",
+    "    TRIM(REGEXP_REPLACE(",
+    "      ai_generated_email, ",
+    "      '(?i)Subject:\\\\s*[^\\\\n]+\\\\n*|(?i)(Dear|Hi|Hello)\\\\s+[^\\\\n]+\\\\n*|(?i)(Best regards|Sincerely|Regards)[\\\\s\\\\S]*', ",
+    "      ''",
+    "    )),",
+    "    '\\n', '<br>'",
+    "  ) AS email_body",
+    "",
+    "FROM lakehousecat.default.customer_reviews_responded;"
+  ],
+  "custom_description_lines": [
+    "{{#QUERY_RESULT_ROWS}}",
+    "{{salutation}},<br><br>",
+    "",
+    "{{email_body}}<br><br>",
+    "",
+    "{{sign_off}}",
+    "<hr>",
+    "{{/QUERY_RESULT_ROWS}}"
+  ]
+}
