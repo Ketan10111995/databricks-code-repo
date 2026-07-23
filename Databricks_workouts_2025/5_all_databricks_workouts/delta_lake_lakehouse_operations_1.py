@@ -78,6 +78,10 @@ df.write.saveAsTable("lakehousecat1.deltadb.drugstbl",mode='overwrite')#writing 
 
 # COMMAND ----------
 
+
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ####2. DML Operations in Delta Tables & Files
 # MAGIC - We are overcoming the WORM (Write Once Read Many) limitation in Cloud S3/GCS/ADLS or in Distributed storage layers like HDFS
@@ -108,7 +112,7 @@ df.write.saveAsTable("lakehousecat1.deltadb.drugstbl",mode='overwrite')#writing 
 
 # MAGIC %sql
 # MAGIC --DQL is supported
-# MAGIC SELECT * FROM drugstbl where uniqueid=163740;
+# MAGIC SELECT * FROM lakehousecat1.deltadb.drugstbl where uniqueid=163740;
 
 # COMMAND ----------
 
@@ -119,7 +123,7 @@ df.write.saveAsTable("lakehousecat1.deltadb.drugstbl",mode='overwrite')#writing 
 
 # MAGIC %sql
 # MAGIC --DML - update is possible in the delta tables/files
-# MAGIC UPDATE drugstbl
+# MAGIC UPDATE lakehousecat1.deltadb.drugstbl
 # MAGIC   SET rating=rating-1
 # MAGIC where uniqueid=163740;
 
@@ -127,7 +131,7 @@ df.write.saveAsTable("lakehousecat1.deltadb.drugstbl",mode='overwrite')#writing 
 
 # MAGIC %sql
 # MAGIC --default latest version will be shown
-# MAGIC SELECT * FROM drugstbl 
+# MAGIC SELECT * FROM lakehousecat1.deltadb.drugstbl
 # MAGIC where uniqueid=163740;
 
 # COMMAND ----------
@@ -139,19 +143,19 @@ df.write.saveAsTable("lakehousecat1.deltadb.drugstbl",mode='overwrite')#writing 
 
 # MAGIC %sql
 # MAGIC --DML - Delete is possible on delta tables/files
-# MAGIC DELETE FROM drugstbl
+# MAGIC DELETE FROM lakehousecat1.deltadb.drugstbl
 # MAGIC where uniqueid=163740;
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT * FROM drugstbl
+# MAGIC SELECT * FROM lakehousecat1.deltadb.drugstbl
 # MAGIC where uniqueid in (163740,206473);
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC desc history drugstbl;
+# MAGIC desc history lakehousecat1.deltadb.drugstbl;
 
 # COMMAND ----------
 
@@ -206,23 +210,23 @@ df.where('uniqueid=206473').show()
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select count(*) from drugstbl;
+# MAGIC select count(*) from lakehousecat1.deltadb.drugstbl;
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC --CTAS (Create table As Select)
-# MAGIC create or replace table drugstbl_merge as select * from drugstbl where rating<=8;
+# MAGIC create or replace table drugstbl_merge as select * from lakehousecat1.deltadb.drugstbl where rating<=8;
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select count(*) from drugstbl where rating>8
+# MAGIC select count(*) from lakehousecat1.deltadb.drugstbl where rating>8
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select count(*) from drugstbl_merge;
+# MAGIC select count(*) from lakehousecat1.deltadb.drugstbl_merge;
 
 # COMMAND ----------
 
@@ -236,8 +240,9 @@ df.where('uniqueid=206473').show()
 # MAGIC --2899 updated
 # MAGIC --2801 inserted
 # MAGIC MERGE INTO drugstbl_merge tgt--2899
-# MAGIC USING drugstbl src--5700
+# MAGIC USING lakehousecat1.deltadb.drugstbl src--5700
 # MAGIC ON tgt.uniqueid = src.uniqueid
+# MAGIC WHEN MATCHED AND src.rating>6 THEN DELETE
 # MAGIC WHEN MATCHED THEN--2899 update
 # MAGIC   UPDATE SET tgt.usefulcount= src.usefulcount,
 # MAGIC              tgt.drugname = src.drugname,
@@ -255,7 +260,7 @@ df.where('uniqueid=206473').show()
 
 # MAGIC %sql
 # MAGIC --What if the source got some data removed and which is present in the target still (we can leave it or delete)
-# MAGIC insert into drugstbl_merge select 99999999,drugname,condition,rating,date,usefulcount 
+# MAGIC insert into drugstbl_merge select drugname,condition,rating,date,usefulcount 
 # MAGIC from drugstbl limit 1;
 
 # COMMAND ----------
